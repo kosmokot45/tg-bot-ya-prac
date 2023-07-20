@@ -1,53 +1,76 @@
-from telebot import TeleBot, types
-import requests
-import time
-import json
+from telebot import TeleBot, types, logger
+import os
 from settings import BOT_TOKEN, REP_LINK, YA_IAM_TOKEN
+from converter import Converter
+# import logging
 
 bot = TeleBot(BOT_TOKEN)
 iam_key = YA_IAM_TOKEN
 
+# logging.basicConfig(level=logging.INFO,
+#                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# logger = logging.getLogger()
+
+def main_menu():
+    main_keyboard = types.ReplyKeyboardMarkup()
+    photo_btn = types.KeyboardButton('Фотографии')
+    joy_btn = types.KeyboardButton('Увлечение')
+    voice_btn = types.KeyboardButton('Войсы')
+    main_keyboard.row(photo_btn, joy_btn)
+    main_keyboard.row(voice_btn)
+    return main_keyboard
+
+def photo_menu():
+    photo_keyboard = types.ReplyKeyboardMarkup()
+    last_photo_btn = types.KeyboardButton('Последние селфи')        
+    school_photo_btn = types.KeyboardButton('Старшая школа))')
+    back_btn = types.KeyboardButton('Назад')
+    photo_keyboard.row(last_photo_btn, school_photo_btn)
+    photo_keyboard.row(back_btn)
+    return photo_keyboard
+
+
 @bot.message_handler(commands=['start', 'hello'])
 def send_message(message):
-    bot.reply_to(message, f"Привет {message.chat.first_name}!")
+    main_keyboard = main_menu()
+    bot.send_message(message.chat.id, f"Привет {message.chat.first_name}!", reply_markup=main_keyboard)
+    # bot.register_next_step_handler(message, on_click)
 
-@bot.message_handler(content_types=["voice"])
-def voice_rec(message):
-    file_info = bot.get_file(message.voice.file_id)
-    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(BOT_TOKEN, file_info.file_path))
-    
-    POST = "https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize"
-    body ={
-        "config": {
-            "specification": {
-                "languageCode": "ru-RU"
-            }
-        },
-        "audio": {
-            "uri": file
-        }
-    }
+@bot.message_handler(content_types=['text'])
+def text_commands(message):
+    if message.text == 'Фотографии':
+        photo_keyboard = photo_menu()
+        bot.send_message(message.chat.id, 'Какие конкретно?', reply_markup=photo_keyboard)
+    elif message.text == 'Увлечение':
+        main_keyboard = main_menu()
+        bot.send_message(message.chat.id, 'Люблю пирожки', reply_markup=main_keyboard)
+    elif message.text == 'Войсы':
+        main_keyboard = main_menu()
+        bot.send_message(message.chat.id, 'Ща расскажу')
+    elif message.text == 'Назад':
+        main_keyboard = main_menu()
+        bot.send_message(message.chat.id, 'Выберите кнопку или воспользуюйтесь меню', reply_markup=main_keyboard)
+    else:
+        bot.reply_to(message, 'Я еще не знаю такой команды :(')
 
-    header = {'Authorization': 'Bearer {}'.format(iam_key)}
-    
-    req = requests.post(POST, headers=header, json=body)
-    data = req.json()
-    print(data)
-    id = data['id']
-    while True:
 
-        time.sleep(1)
+@bot.message_handler(content_types=['voice'])
+def get_audio_messages(message: types.Message):
+    file_id = message.voice.file_id
+    file_info = bot.get_file(file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    file_name = str(message.message_id) + '.ogg'
+    name = message.chat.first_name if message.chat.first_name else 'No_name'
+    logger.info(f"Chat {name} (ID: {message.chat.id}) download file {file_name}")
 
-        GET = "https://operation.api.cloud.yandex.net/operations/{id}"
-        req = requests.get(GET.format(id=id), headers=header)
-        req = req.json()
+    with open(file_name, 'wb') as new_file:
+        new_file.write(downloaded_file)
+    converter = Converter(file_name)
+    os.remove(file_name)
+    message_text = converter.audio_to_text()
+    del converter
+    bot.send_message(message.chat.id, message_text, reply_to_message_id=message.message_id)
 
-        if req['done']: break
-        print("Not ready")
-    print("Text chunks:")
-    for chunk in req['response']['chunks']:
-        print(chunk['alternatives'][0]['text'])
-    bot.reply_to(req['response']['chunks'])
 
 @bot.message_handler(commands=['cat', 'dog'])
 def send_watch(message):
@@ -84,8 +107,9 @@ def send_help(message):
                  'Хотите доги? - /dog', reply_markup=keyboard
                  )
 
-@bot.message_handler()
-def send_unknow(message):
-    bot.reply_to(message, 'Я еще не знаю такой команды :(')
+# @bot.message_handler()
+# def send_unknow(message):
+#     bot.reply_to(message, 'Я еще не знаю такой команды :(')
+
 
 bot.infinity_polling()
