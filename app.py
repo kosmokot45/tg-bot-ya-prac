@@ -131,13 +131,5 @@ def text_commands(message):
     else:
         bot.reply_to(message, 'Я еще не знаю такой команды :(')
 
-# ('Что такое GPT?')        
-#     sql_voice_btn = types.KeyboardButton('SQL и NoSQL')
-#     love_voice_btn = types.KeyboardButton('Первая любовь 😻')
-
-# @bot.message_handler()
-# def send_unknow(message):
-#     bot.reply_to(message, 'Я еще не знаю такой команды :(')
-
 
 bot.infinity_polling()
