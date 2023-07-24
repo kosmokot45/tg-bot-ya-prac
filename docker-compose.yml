@@ -5,9 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    #command: tail -f /dev/null #test mode
-    # volumes:
-    #   - ./.logs:/app/.logs
     env_file:
        - .env
     restart: unless-stopped

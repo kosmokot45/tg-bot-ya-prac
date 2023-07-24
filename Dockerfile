@@ -1,7 +1,6 @@
 FROM python:3.11
 
-RUN apt-get update && apt-get install -y \
-    ffmpeg
+RUN apt-get update && apt-get install ffmpeg
 
 # create the app user
 RUN addgroup --system app && adduser --system --group app
