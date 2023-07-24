@@ -4,7 +4,7 @@ meta:
     name: pip
     version: 3.8
 build:
-  requirementsPath: requirements.txt
+  requirementsPath: /requirements.txt
 run:
   scriptName: app.py
   persistenceMount: /data
