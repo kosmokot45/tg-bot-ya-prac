@@ -4,7 +4,8 @@ from settings import BOT_TOKEN, REP_LINK #, YA_IAM_TOKEN
 from converter import Converter
 import logging
 
-bot = TeleBot(BOT_TOKEN)
+token = os.environ['BOT_TOKEN']
+bot = TeleBot(token)
 # iam_key = YA_IAM_TOKEN
 
 logging.basicConfig(level=logging.INFO,
