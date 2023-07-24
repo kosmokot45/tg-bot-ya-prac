@@ -1,18 +1,18 @@
 from telebot import TeleBot, types, logger
 import os
-from settings import BOT_TOKEN, REP_LINK, YA_IAM_TOKEN
+from settings import BOT_TOKEN, REP_LINK #, YA_IAM_TOKEN
 from converter import Converter
-# import logging
+import logging
 
 bot = TeleBot(BOT_TOKEN)
-iam_key = YA_IAM_TOKEN
+# iam_key = YA_IAM_TOKEN
 
-# logging.basicConfig(level=logging.INFO,
-#                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
 
 def main_menu():
-    main_keyboard = types.ReplyKeyboardMarkup()
+    main_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     photo_btn = types.KeyboardButton('Фотографии')
     joy_btn = types.KeyboardButton('Увлечение')
     voice_btn = types.KeyboardButton('Войсы')
@@ -21,7 +21,7 @@ def main_menu():
     return main_keyboard
 
 def photo_menu():
-    photo_keyboard = types.ReplyKeyboardMarkup()
+    photo_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     last_photo_btn = types.KeyboardButton('Последние селфи')        
     school_photo_btn = types.KeyboardButton('Старшая школа))')
     back_btn = types.KeyboardButton('Назад')
@@ -29,30 +29,22 @@ def photo_menu():
     photo_keyboard.row(back_btn)
     return photo_keyboard
 
+def voice_menu():
+    voice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    gpt_voice_btn = types.KeyboardButton('Что такое GPT?')        
+    sql_voice_btn = types.KeyboardButton('SQL и NoSQL')
+    love_voice_btn = types.KeyboardButton('Первая любовь 😻')
+    back_btn = types.KeyboardButton('Назад')
+    voice_keyboard.row(gpt_voice_btn, sql_voice_btn)
+    voice_keyboard.row(love_voice_btn, back_btn)
+    return voice_keyboard
+
 
 @bot.message_handler(commands=['start', 'hello'])
 def send_message(message):
     main_keyboard = main_menu()
     bot.send_message(message.chat.id, f"Привет {message.chat.first_name}!", reply_markup=main_keyboard)
     # bot.register_next_step_handler(message, on_click)
-
-@bot.message_handler(content_types=['text'])
-def text_commands(message):
-    if message.text == 'Фотографии':
-        photo_keyboard = photo_menu()
-        bot.send_message(message.chat.id, 'Какие конкретно?', reply_markup=photo_keyboard)
-    elif message.text == 'Увлечение':
-        main_keyboard = main_menu()
-        bot.send_message(message.chat.id, 'Люблю пирожки', reply_markup=main_keyboard)
-    elif message.text == 'Войсы':
-        main_keyboard = main_menu()
-        bot.send_message(message.chat.id, 'Ща расскажу')
-    elif message.text == 'Назад':
-        main_keyboard = main_menu()
-        bot.send_message(message.chat.id, 'Выберите кнопку или воспользуюйтесь меню', reply_markup=main_keyboard)
-    else:
-        bot.reply_to(message, 'Я еще не знаю такой команды :(')
-
 
 @bot.message_handler(content_types=['voice'])
 def get_audio_messages(message: types.Message):
@@ -106,6 +98,42 @@ def send_help(message):
                  'Хотите котю? - /cat \n'+
                  'Хотите доги? - /dog', reply_markup=keyboard
                  )
+
+@bot.message_handler(content_types=['text'])
+def text_commands(message):
+    if message.text == 'Фотографии':
+        photo_keyboard = photo_menu()
+        bot.send_message(message.chat.id, 'Какие конкретно?', reply_markup=photo_keyboard)
+    elif message.text == 'Увлечение':
+        main_keyboard = main_menu()
+        bot.send_message(message.chat.id, 'Люблю пирожки', reply_markup=main_keyboard)
+    elif message.text == 'Войсы':
+        voice_keyboard = voice_menu()
+        bot.send_message(message.chat.id, 'Ща расскажу', reply_markup=voice_keyboard)
+    elif message.text == 'Назад':
+        main_keyboard = main_menu()
+        bot.send_message(message.chat.id, 'Выберите кнопку или воспользуюйтесь меню', reply_markup=main_keyboard)
+    elif message.text == 'Последние селфи':
+        with open('img/cat.jpg', 'rb') as file:
+            bot.send_photo(message.chat.id, file)
+    elif message.text == 'Старшая школа))':
+        with open('img/dog.jpg', 'rb') as file:
+            bot.send_photo(message.chat.id, file)
+    elif message.text == 'Что такое GPT?':
+        with open('audio/gpt.ogg', 'rb') as file:
+            bot.send_voice(message.chat.id, file)
+    elif message.text == 'SQL и NoSQL':
+        with open('audio/sql.ogg', 'rb') as file:
+            bot.send_voice(message.chat.id, file)
+    elif message.text == 'Первая любовь 😻':
+        with open('audio/love.ogg', 'rb') as file:
+            bot.send_voice(message.chat.id, file)
+    else:
+        bot.reply_to(message, 'Я еще не знаю такой команды :(')
+
+# ('Что такое GPT?')        
+#     sql_voice_btn = types.KeyboardButton('SQL и NoSQL')
+#     love_voice_btn = types.KeyboardButton('Первая любовь 😻')
 
 # @bot.message_handler()
 # def send_unknow(message):
