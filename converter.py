@@ -2,12 +2,11 @@ import speech_recognition as sr
 import os
 import subprocess
 
-
 class Converter:
 
     def __init__(self, path_to_file: str, language: str = "ru-RU"):
         self.language = language
-        subprocess.run(['C:\\Projects\\ffmpeg\\bin\\ffmpeg', '-v', 'quiet', '-i', path_to_file, path_to_file.replace(".ogg", ".wav")])
+        subprocess.run(['ffmpeg', '-v', 'quiet', '-i', path_to_file, path_to_file.replace(".ogg", ".wav")])
         self.wav_file = path_to_file.replace(".ogg", ".wav")
 
     def audio_to_text(self) -> str:

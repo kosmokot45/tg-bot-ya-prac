@@ -1,12 +1,12 @@
 from telebot import TeleBot, types, logger
 import os
-from settings import BOT_TOKEN, REP_LINK #, YA_IAM_TOKEN
+from settings import BOT_TOKEN, REP_LINK, VOICE_LANGUAGE, YA_IAM_TOKEN
 from converter import Converter
 import logging
+import subprocess
+import traceback
 
-token = os.environ['BOT_TOKEN']
-bot = TeleBot(token)
-# iam_key = YA_IAM_TOKEN
+bot = TeleBot(BOT_TOKEN)
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -45,7 +45,6 @@ def voice_menu():
 def send_message(message):
     main_keyboard = main_menu()
     bot.send_message(message.chat.id, f"Привет {message.chat.first_name}!", reply_markup=main_keyboard)
-    # bot.register_next_step_handler(message, on_click)
 
 @bot.message_handler(content_types=['voice'])
 def get_audio_messages(message: types.Message):
@@ -63,7 +62,6 @@ def get_audio_messages(message: types.Message):
     message_text = converter.audio_to_text()
     del converter
     bot.send_message(message.chat.id, message_text, reply_to_message_id=message.message_id)
-
 
 @bot.message_handler(commands=['cat', 'dog'])
 def send_watch(message):
