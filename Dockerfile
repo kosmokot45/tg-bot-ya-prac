@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11.1
 
 WORKDIR /app
 # FROM jrottenberg/ffmpeg:3.3-alpine
