@@ -61,13 +61,14 @@ def send_help(message):
     )
     bot.send_message(message.chat.id, 
                  'Получение ссылки на репозиторий - /site \n'+
-                 
                  'Большинство комманд доступны через меню, текст и голосовое сообщение.\n'+
                  'Это относится к следующему функционалу:\n'+
                  'Фотографии, последние селфи, фото из старшей школы. Пост о главном увлечении. Войсы. Первая любовь 😻\n'
                  'Например можно отправить в чат сообщение "Фотографии" или отправить такое же голосовое сообщение.\n'
                  'Так же можно выбрать эту команду через меню. \n' +
-                 'Некоторые команды доступны по синонимичным словам, например "фотографии" - "фотки"\n'
+                 'Некоторые команды доступны по синонимичным словам, например "фотографии" - "фотки"\n'+
+                 'Так же есть фото котика - /cat\n'+
+                 'И фото собачки - /dog'
                  , reply_markup=keyboard
                  )
 
@@ -95,23 +96,25 @@ def text_commands(message, text = ''):
         bot.send_message(message.chat.id, 'Выберите кнопку или воспользуйтесь меню', reply_markup=main_keyboard)
 
     elif command in utils.commands_selfie:
-        with open('img/cat.jpg', 'rb') as file:
-            bot.send_photo(message.chat.id, file)
+        with open('img/self_1.jpg', 'rb') as file_1, open('img/self_2.jpg', 'rb') as file_2:
+            bot.send_photo(message.chat.id, file_1)
+            bot.send_photo(message.chat.id, file_2)
 
     elif command in utils.commands_school:
-        with open('img/dog.jpg', 'rb') as file:
-            bot.send_photo(message.chat.id, file)
+        with open('img/school_1.jpg', 'rb') as file_1, open('img/school_2.jpg', 'rb') as file_2:
+            bot.send_photo(message.chat.id, file_1)
+            bot.send_photo(message.chat.id, file_2)
 
     elif command in utils.commands_gpt:
-        with open('audio/gpt.ogg', 'rb') as file:
+        with open('audio/gpt_true.ogg', 'rb') as file:
             bot.send_voice(message.chat.id, file)
 
     elif command in utils.commands_sql:
-        with open('audio/sql.ogg', 'rb') as file:
+        with open('audio/sql_true.ogg', 'rb') as file:
             bot.send_voice(message.chat.id, file)
 
     elif command in utils.commands_love:
-        with open('audio/love.ogg', 'rb') as file:
+        with open('audio/love_true.ogg', 'rb') as file:
             bot.send_voice(message.chat.id, file)
     else:
         bot.reply_to(message, f'Я еще не знаю такой команды :( - {command}')
