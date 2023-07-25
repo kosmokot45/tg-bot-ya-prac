@@ -3,6 +3,8 @@ import os
 from settings import BOT_TOKEN, REP_LINK, VOICE_LANGUAGE, YA_IAM_TOKEN
 from converter import Converter
 import logging
+import utils
+import keyboards as kb
 
 bot = TeleBot(BOT_TOKEN)
 
@@ -10,39 +12,14 @@ logging.basicConfig(filename='filename.log', level=logging.INFO,
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
 
-def main_menu():
-    main_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    photo_btn = types.KeyboardButton('Фотографии')
-    joy_btn = types.KeyboardButton('Увлечение')
-    voice_btn = types.KeyboardButton('Войсы')
-    main_keyboard.row(photo_btn, joy_btn)
-    main_keyboard.row(voice_btn)
-    return main_keyboard
-
-def photo_menu():
-    photo_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    last_photo_btn = types.KeyboardButton('Последние селфи')        
-    school_photo_btn = types.KeyboardButton('Старшая школа))')
-    back_btn = types.KeyboardButton('Назад')
-    photo_keyboard.row(last_photo_btn, school_photo_btn)
-    photo_keyboard.row(back_btn)
-    return photo_keyboard
-
-def voice_menu():
-    voice_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    gpt_voice_btn = types.KeyboardButton('Что такое GPT?')        
-    sql_voice_btn = types.KeyboardButton('SQL и NoSQL')
-    love_voice_btn = types.KeyboardButton('Первая любовь 😻')
-    back_btn = types.KeyboardButton('Назад')
-    voice_keyboard.row(gpt_voice_btn, sql_voice_btn)
-    voice_keyboard.row(love_voice_btn, back_btn)
-    return voice_keyboard
-
 
 @bot.message_handler(commands=['start', 'hello'])
 def send_message(message):
-    main_keyboard = main_menu()
-    bot.send_message(message.chat.id, f"Привет {message.chat.first_name}!", reply_markup=main_keyboard)
+    main_keyboard = kb.main_menu()
+    bot.send_message(message.chat.id, f"Привет, {message.chat.first_name}!\n" +
+                     "Меня зовут Евгений Попов и это мой телеграм бот по тестовому заданию для наставников Яндекс Практикума!\n"
+                     "Для управления ботом используй кнопки или команды в меню.\n"
+                     "Также присутствует управление голосовыми командами. Полный список команд представлен в /help", reply_markup=main_keyboard)
 
 @bot.message_handler(content_types=['voice'])
 def get_audio_messages(message: types.Message):
@@ -52,15 +29,14 @@ def get_audio_messages(message: types.Message):
     file_name = str(message.message_id) + '.ogg'
     name = message.chat.first_name if message.chat.first_name else 'No_name'
     logger.info(f"Chat {name} (ID: {message.chat.id}) download file {file_name}")
-
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_file)
     converter = Converter(file_name)
-    print('ololo')
     os.remove(file_name)
     message_text = converter.audio_to_text()
     del converter
-    bot.send_message(message.chat.id, message_text, reply_to_message_id=message.message_id)
+    print(message_text)
+    text_commands(message, message_text)
 
 @bot.message_handler(commands=['cat', 'dog'])
 def send_watch(message):
@@ -71,14 +47,6 @@ def send_watch(message):
         with open('img/dog.jpg', 'rb') as file:
             bot.send_photo(message.chat.id, file)
       
-@bot.message_handler(commands=['read'])
-def send_text(message):
-    pass
-
-@bot.message_handler(commands=['voice'])
-def send_voice(message):
-    pass
-
 @bot.message_handler(commands=['site'])
 def send_site(message):
     bot.reply_to(message, REP_LINK)
@@ -92,42 +60,61 @@ def send_help(message):
         )
     )
     bot.send_message(message.chat.id, 
-                 'Для получения ссылки на репозиторий - /site \n'+
-                 'Хотите котю? - /cat \n'+
-                 'Хотите доги? - /dog', reply_markup=keyboard
+                 'Получение ссылки на репозиторий - /site \n'+
+                 
+                 'Большинство комманд доступны через меню, текст и голосовое сообщение.\n'+
+                 'Это относится к следующему функционалу:\n'+
+                 'Фотографии, последние селфи, фото из старшей школы. Пост о главном увлечении. Войсы. Первая любовь 😻\n'
+                 'Например можно отправить в чат сообщение "Фотографии" или отправить такое же голосовое сообщение.\n'
+                 'Так же можно выбрать эту команду через меню. \n' +
+                 'Некоторые команды доступны по синонимичным словам, например "фотографии" - "фотки"\n'
+                 , reply_markup=keyboard
                  )
 
 @bot.message_handler(content_types=['text'])
-def text_commands(message):
-    if message.text == 'Фотографии':
-        photo_keyboard = photo_menu()
+def text_commands(message, text = ''):
+    if text != '':
+        command = text.lower()
+    else:
+        command = message.text.lower()
+
+    if command in utils.commands_photo:
+        photo_keyboard = kb.photo_menu()
         bot.send_message(message.chat.id, 'Какие конкретно?', reply_markup=photo_keyboard)
-    elif message.text == 'Увлечение':
-        main_keyboard = main_menu()
-        bot.send_message(message.chat.id, 'Люблю пирожки', reply_markup=main_keyboard)
-    elif message.text == 'Войсы':
-        voice_keyboard = voice_menu()
-        bot.send_message(message.chat.id, 'Ща расскажу', reply_markup=voice_keyboard)
-    elif message.text == 'Назад':
-        main_keyboard = main_menu()
-        bot.send_message(message.chat.id, 'Выберите кнопку или воспользуюйтесь меню', reply_markup=main_keyboard)
-    elif message.text == 'Последние селфи':
+
+    elif command in utils.commands_hobby:
+        main_keyboard = kb.main_menu()
+        bot.send_message(message.chat.id, utils.hobby, reply_markup=main_keyboard)
+
+    elif command in utils.commands_voice:
+        voice_keyboard = kb.voice_menu()
+        bot.send_message(message.chat.id, 'Что хочешь услышать?', reply_markup=voice_keyboard)
+
+    elif command in utils.commands_back:
+        main_keyboard = kb.main_menu()
+        bot.send_message(message.chat.id, 'Выберите кнопку или воспользуйтесь меню', reply_markup=main_keyboard)
+
+    elif command in utils.commands_selfie:
         with open('img/cat.jpg', 'rb') as file:
             bot.send_photo(message.chat.id, file)
-    elif message.text == 'Старшая школа))':
+
+    elif command in utils.commands_school:
         with open('img/dog.jpg', 'rb') as file:
             bot.send_photo(message.chat.id, file)
-    elif message.text == 'Что такое GPT?':
+
+    elif command in utils.commands_gpt:
         with open('audio/gpt.ogg', 'rb') as file:
             bot.send_voice(message.chat.id, file)
-    elif message.text == 'SQL и NoSQL':
+
+    elif command in utils.commands_sql:
         with open('audio/sql.ogg', 'rb') as file:
             bot.send_voice(message.chat.id, file)
-    elif message.text == 'Первая любовь 😻':
+
+    elif command in utils.commands_love:
         with open('audio/love.ogg', 'rb') as file:
             bot.send_voice(message.chat.id, file)
     else:
-        bot.reply_to(message, 'Я еще не знаю такой команды :(')
+        bot.reply_to(message, f'Я еще не знаю такой команды :( - {command}')
 
 
 bot.infinity_polling()
