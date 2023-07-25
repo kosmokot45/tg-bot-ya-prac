@@ -1,22 +1,21 @@
-FROM python:3.11
-
+FROM python:3.10
 RUN apt-get update && apt-get install ffmpeg
 
 # create the app user
-RUN addgroup --system app && adduser --system --group app
+# RUN addgroup --system app && adduser --system --group app
 
 # set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# ENV PYTHONDONTWRITEBYTECODE 1
+# ENV PYTHONUNBUFFERED 1
 
-WORKDIR /app
+# WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
 # test/debug mode
 # ENTRYPOINT ["tail", "-f", "/dev/null"]
 
-CMD [ "python", "app.py" ]
+# CMD [ "python", "app.py" ]
