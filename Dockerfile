@@ -1,7 +1,8 @@
 FROM python:3.11.1
 
-WORKDIR /app
 FROM jrottenberg/ffmpeg:3.3-alpine
+
+WORKDIR /app
 RUN apt-get update && apt-get install ffmpeg -y
 
 # create the app user
