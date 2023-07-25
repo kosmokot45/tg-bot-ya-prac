@@ -3,12 +3,10 @@ import os
 from settings import BOT_TOKEN, REP_LINK, VOICE_LANGUAGE, YA_IAM_TOKEN
 from converter import Converter
 import logging
-import subprocess
-import traceback
 
 bot = TeleBot(BOT_TOKEN)
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(filename='filename.log', level=logging.INFO,
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
 
