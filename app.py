@@ -56,6 +56,7 @@ def get_audio_messages(message: types.Message):
     with open(file_name, 'wb') as new_file:
         new_file.write(downloaded_file)
     converter = Converter(file_name)
+    print('ololo')
     os.remove(file_name)
     message_text = converter.audio_to_text()
     del converter

@@ -7,14 +7,14 @@ class Converter:
 
     def __init__(self, path_to_file: str, language: str = "ru-RU"):
         self.language = language
-        subprocess.run(['ffmpeg', '-v', 'quiet', '-i', path_to_file, path_to_file.replace(".ogg", ".wav")])
-        self.wav_file = path_to_file.replace(".ogg", ".wav")
-        # ff = ffmpy.FFmpeg(
-        #     inputs={path_to_file: None},
-        #     outputs={path_to_file.replace(".ogg", ".wav"): None}
-        # )
-        # ff.run()    
+        # subprocess.run(['ffmpeg', '-v', 'quiet', '-i', path_to_file, path_to_file.replace(".ogg", ".wav")])
         # self.wav_file = path_to_file.replace(".ogg", ".wav")
+        ff = ffmpy.FFmpeg(
+            inputs={path_to_file: None},
+            outputs={path_to_file.replace(".ogg", ".wav"): None}
+        )
+        ff.run()
+        self.wav_file = path_to_file.replace(".ogg", ".wav")
 
     def audio_to_text(self) -> str:
         r = sr.Recognizer()
