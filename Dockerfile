@@ -1,4 +1,5 @@
 FROM python:3.10
+FROM jrottenberg/ffmpeg:3.3-alpine
 RUN apt-get update && apt-get install ffmpeg
 
 # create the app user
@@ -12,7 +13,7 @@ RUN apt-get update && apt-get install ffmpeg
 
 COPY requirements.txt .
 # RUN pip install --no-cache-dir -r requirements.txt
-
+COPY --from=1 / /
 COPY . .
 
 # test/debug mode
