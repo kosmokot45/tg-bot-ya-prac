@@ -1,6 +1,6 @@
 from telebot import TeleBot, types, logger
 import os
-from settings import BOT_TOKEN, REP_LINK, VOICE_LANGUAGE, YA_IAM_TOKEN
+from settings import BOT_TOKEN, REP_LINK
 from converter import Converter
 import logging
 import utils
